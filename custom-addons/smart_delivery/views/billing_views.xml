@@ -1,0 +1,364 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <!-- BILLING LIST VIEW -->
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <record id="view_delivery_billing_tree" model="ir.ui.view">
+        <field name="name">delivery.billing.tree</field>
+        <field name="model">delivery.billing</field>
+        <field name="arch" type="xml">
+            <list string="Facturation Livraison" 
+                  decoration-success="state == 'paid'" 
+                  decoration-info="state in ('posted', 'invoiced')"
+                  decoration-warning="state == 'partial'"
+                  decoration-muted="state == 'cancelled'"
+                  multi_edit="1"
+                  sample="1">
+                <field name="order_id" decoration-bf="1"/>
+                <field name="enterprise_id" string="Entreprise" widget="many2one_avatar" optional="show"/>
+                <field name="receiver_partner_id" string="Payeur" widget="many2one_avatar"/>
+                <field name="distance_km" optional="hide" widget="float"/>
+                <field name="base_tariff" string="Base" widget="monetary" optional="show"/>
+                <field name="extra_fee" string="Distance" widget="monetary" optional="hide"/>
+                <field name="total_amount" sum="Total" string="Total" widget="monetary" decoration-bf="1"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="invoice_id" optional="show"/>
+                <field name="invoice_amount_residual" string="Reste à Payer" widget="monetary"
+                       decoration-danger="invoice_amount_residual > 0"
+                       optional="show"/>
+                <field name="state" widget="badge"/>
+                <button name="action_quick_pay_cash" 
+                        type="object" 
+                        icon="fa-money"
+                        title="Paiement Espèces"
+                        class="text-success"
+                        invisible="state in ('paid', 'cancelled', 'draft')"/>
+                <button name="action_view_invoice" 
+                        type="object" 
+                        icon="fa-file-text-o"
+                        title="Voir Facture"
+                        class="text-primary"
+                        invisible="not invoice_id"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <!-- BILLING FORM VIEW -->
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <record id="view_delivery_billing_form" model="ir.ui.view">
+        <field name="name">delivery.billing.form</field>
+        <field name="model">delivery.billing</field>
+        <field name="arch" type="xml">
+            <form string="Facturation Livraison">
+                <header>
+                    <button name="action_create_invoice" 
+                            string="Créer Facture" 
+                            type="object" 
+                            class="oe_highlight"
+                            invisible="invoice_id or state == 'cancelled'"/>
+                    
+                    <button name="action_post_invoice" 
+                            string="Confirmer Facture" 
+                            type="object" 
+                            class="oe_highlight"
+                            invisible="state != 'invoiced'"/>
+                    
+                    <button name="action_quick_pay_cash" 
+                            string="Paiement Espèces" 
+                            type="object" 
+                            class="btn-success"
+                            invisible="state in ('paid', 'cancelled', 'draft')"/>
+                    
+                    <button name="action_register_payment" 
+                            string="Enregistrer Paiement" 
+                            type="object" 
+                            class="btn-primary"
+                            invisible="state not in ('posted', 'partial')"/>
+                    
+                    <button name="action_view_invoice" 
+                            string="Voir Facture" 
+                            type="object" 
+                            class="btn-secondary"
+                            invisible="not invoice_id"/>
+                    
+                    <button name="action_send_invoice_by_email" 
+                            string="Envoyer par Email" 
+                            type="object" 
+                            class="btn-secondary"
+                            invisible="state not in ('posted', 'paid', 'partial')"/>
+                    
+                    <button name="action_cancel" 
+                            string="Annuler" 
+                            type="object"
+                            class="btn-link text-danger"
+                            invisible="state in ('paid', 'cancelled')"
+                            confirm="Êtes-vous sûr de vouloir annuler cette facturation?"/>
+                    
+                    <button name="action_reset_draft" 
+                            string="Remettre en Brouillon" 
+                            type="object"
+                            class="btn-secondary"
+                            invisible="state != 'cancelled'"/>
+                    
+                    <field name="state" widget="statusbar" 
+                           statusbar_visible="draft,invoiced,posted,paid"/>
+                </header>
+                
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_invoice" 
+                                type="object" 
+                                class="oe_stat_button" 
+                                icon="fa-file-text-o"
+                                invisible="not invoice_id">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Facture</span>
+                                <span class="o_stat_value">
+                                    <field name="invoice_name"/>
+                                </span>
+                            </div>
+                        </button>
+                        
+                        <button name="action_view_payments" 
+                                type="object" 
+                                class="oe_stat_button" 
+                                icon="fa-money"
+                                invisible="payment_count == 0">
+                            <field name="payment_count" widget="statinfo" string="Paiements"/>
+                        </button>
+                        
+                        <button name="action_open_reconcile" 
+                                type="object" 
+                                class="oe_stat_button" 
+                                icon="fa-link"
+                                invisible="state not in ('posted', 'partial')"
+                                title="Réconciliation">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Réconciliation</span>
+                            </div>
+                        </button>
+                    </div>
+                    
+                    <widget name="web_ribbon" title="Payé" bg_color="text-bg-success" 
+                            invisible="state != 'paid'"/>
+                    <widget name="web_ribbon" title="Annulé" bg_color="text-bg-danger" 
+                            invisible="state != 'cancelled'"/>
+                    
+                    <div class="oe_title">
+                        <label for="order_id" string="Commande"/>
+                        <h1>
+                            <field name="order_id" readonly="1" options="{'no_open': False}"/>
+                        </h1>
+                        <h3 invisible="not invoice_id" class="text-muted">
+                            <field name="invoice_name" readonly="1"/>
+                        </h3>
+                    </div>
+                    
+                    <div class="alert alert-warning" role="alert" 
+                         invisible="state != 'posted' or invoice_amount_residual == 0">
+                        <strong>Montant restant à payer:</strong>
+                        <field name="invoice_amount_residual" class="fw-bold"/> 
+                        <field name="currency_id" invisible="1"/>
+                    </div>
+                    
+                    <div class="alert alert-success" role="alert" 
+                         invisible="state != 'paid'">
+                        <strong>Paiement complet</strong> - Cette facture a été entièrement payée.
+                    </div>
+                    
+                    <group>
+                        <group string="Informations Commande">
+                            <field name="enterprise_id" readonly="1" widget="many2one_avatar"/>
+                            <field name="sender_partner_id" string="Expéditeur" widget="many2one_avatar"/>
+                            <field name="receiver_partner_id" string="Destinataire (Payeur)" widget="many2one_avatar"/>
+                        </group>
+                        <group string="Tarification">
+                            <field name="distance_km" string="Distance (km)"/>
+                            <field name="base_tariff" widget="monetary"/>
+                            <field name="extra_fee" widget="monetary"/>
+                            <field name="total_amount" widget="monetary" class="fw-bold"/>
+                        </group>
+                    </group>
+                    
+                    <group string="Facture Odoo" invisible="not invoice_id">
+                        <group>
+                            <field name="invoice_id" readonly="1"/>
+                            <field name="invoice_state" widget="badge"/>
+                        </group>
+                        <group>
+                            <field name="invoice_amount_total" string="Montant Facturé" widget="monetary"/>
+                            <field name="invoice_amount_residual" string="Reste à Payer" widget="monetary"
+                                   decoration-danger="invoice_amount_residual > 0"/>
+                            <field name="invoice_payment_state" widget="badge"/>
+                        </group>
+                    </group>
+                    
+                    <group string="Notes">
+                        <field name="notes" nolabel="1" placeholder="Notes internes..."/>
+                    </group>
+                </sheet>
+                
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <!-- BILLING SEARCH VIEW -->
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <record id="view_delivery_billing_search" model="ir.ui.view">
+        <field name="name">delivery.billing.search</field>
+        <field name="model">delivery.billing</field>
+        <field name="arch" type="xml">
+            <search string="Rechercher Facturation">
+                <field name="order_id"/>
+                <field name="enterprise_id"/>
+                <field name="receiver_partner_id"/>
+                <field name="invoice_id"/>
+                <separator/>
+                <filter string="Brouillon" name="draft" domain="[('state', '=', 'draft')]"/>
+                <filter string="Facturé" name="invoiced" domain="[('state', '=', 'invoiced')]"/>
+                <filter string="Confirmé" name="posted" domain="[('state', '=', 'posted')]"/>
+                <filter string="Payé" name="paid" domain="[('state', '=', 'paid')]"/>
+                <filter string="Annulé" name="cancelled" domain="[('state', '=', 'cancelled')]"/>
+                <separator/>
+                <filter string="À Payer" name="to_pay" 
+                        domain="[('state', 'in', ['posted', 'partial']), ('invoice_amount_residual', '>', 0)]"/>
+                <filter string="Sans Facture" name="no_invoice" domain="[('invoice_id', '=', False)]"/>
+                <separator/>
+                <filter string="Aujourd'hui" name="today" 
+                        domain="[('create_date', '>=', (context_today()).strftime('%Y-%m-%d'))]"/>
+                <group expand="1" string="Grouper par">
+                    <filter string="État" name="group_state" context="{'group_by': 'state'}"/>
+                    <filter string="Entreprise" name="group_enterprise" context="{'group_by': 'enterprise_id'}"/>
+                    <filter string="État Paiement" name="group_payment" context="{'group_by': 'invoice_payment_state'}"/>
+                    <filter string="Date" name="group_date" context="{'group_by': 'create_date:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <!-- BILLING KANBAN VIEW -->
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <record id="view_delivery_billing_kanban" model="ir.ui.view">
+        <field name="name">delivery.billing.kanban</field>
+        <field name="model">delivery.billing</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="state" class="o_kanban_mobile" sample="1">
+                <field name="order_id"/>
+                <field name="enterprise_id"/>
+                <field name="total_amount"/>
+                <field name="state"/>
+                <field name="invoice_id"/>
+                <field name="invoice_payment_state"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_card oe_kanban_global_click">
+                            <div class="oe_kanban_content">
+                                <div class="o_kanban_record_top mb-2">
+                                    <div class="o_kanban_record_headings">
+                                        <strong class="o_kanban_record_title">
+                                            <field name="order_id"/>
+                                        </strong>
+                                    </div>
+                                    <field name="state" widget="badge"/>
+                                </div>
+                                <div class="o_kanban_record_body">
+                                    <field name="enterprise_id"/>
+                                    <div class="mt-2">
+                                        <strong><field name="total_amount" widget="monetary"/> MRU</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <!-- BILLING PIVOT VIEW -->
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <record id="view_delivery_billing_pivot" model="ir.ui.view">
+        <field name="name">delivery.billing.pivot</field>
+        <field name="model">delivery.billing</field>
+        <field name="arch" type="xml">
+            <pivot string="Analyse Facturation" sample="1">
+                <field name="enterprise_id" type="row"/>
+                <field name="state" type="col"/>
+                <field name="total_amount" type="measure"/>
+                <field name="distance_km" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <!-- BILLING GRAPH VIEW -->
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <record id="view_delivery_billing_graph" model="ir.ui.view">
+        <field name="name">delivery.billing.graph</field>
+        <field name="model">delivery.billing</field>
+        <field name="arch" type="xml">
+            <graph string="Facturation" type="bar" sample="1">
+                <field name="create_date" type="row" interval="month"/>
+                <field name="state" type="col"/>
+                <field name="total_amount" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <!-- ACTION -->
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <record id="action_delivery_billing" model="ir.actions.act_window">
+        <field name="name">Facturation Livraison</field>
+        <field name="res_model">delivery.billing</field>
+        <field name="view_mode">list,kanban,form,pivot,graph</field>
+        <field name="search_view_id" ref="view_delivery_billing_search"/>
+        <field name="context">{'search_default_to_pay': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Aucune facturation pour le moment
+            </p>
+            <p>
+                La facturation est créée automatiquement lors de la livraison des commandes.
+            </p>
+        </field>
+    </record>
+
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <!-- ACTION: TO PAY -->
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <record id="action_delivery_billing_to_pay" model="ir.actions.act_window">
+        <field name="name">À Encaisser</field>
+        <field name="res_model">delivery.billing</field>
+        <field name="view_mode">list,kanban,form</field>
+        <field name="domain">[('state', 'in', ['posted', 'partial']), ('invoice_amount_residual', '>', 0)]</field>
+        <field name="context">{}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Toutes les factures sont payées!
+            </p>
+        </field>
+    </record>
+
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <!-- SERVER ACTION: QUICK PAY -->
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <record id="action_billing_quick_pay" model="ir.actions.server">
+        <field name="name">Paiement Rapide Espèces</field>
+        <field name="model_id" ref="model_delivery_billing"/>
+        <field name="binding_model_id" ref="model_delivery_billing"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">
+for record in records:
+    if record.state not in ('paid', 'cancelled'):
+        record.action_quick_pay_cash()
+        </field>
+    </record>
+
+</odoo>

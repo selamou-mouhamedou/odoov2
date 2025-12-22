@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_api_log_tree" model="ir.ui.view">
+        <field name="name">api.log.tree</field>
+        <field name="model">api.log</field>
+        <field name="arch" type="xml">
+            <list string="Journaux API" 
+                  decoration-success="status_code == 200" 
+                  decoration-info="status_code == 201"
+                  decoration-danger="status_code >= 400"
+                  default_order="created_at desc"
+                  sample="1">
+                <field name="created_at" widget="datetime" string="Date/Heure"/>
+                <field name="client_id" widget="many2one_avatar" optional="show"/>
+                <field name="endpoint" decoration-bf="1"/>
+                <field name="status_code" widget="badge"/>
+                <field name="error_message" optional="show"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_api_log_form" model="ir.ui.view">
+        <field name="name">api.log.form</field>
+        <field name="model">api.log</field>
+        <field name="arch" type="xml">
+            <form string="Journal API" create="0" edit="0">
+                <sheet>
+                    <div class="oe_title">
+                        <label for="endpoint" string="Endpoint API"/>
+                        <h1>
+                            <field name="endpoint"/>
+                        </h1>
+                    </div>
+                    
+                    <group>
+                        <group string="Informations">
+                            <field name="client_id" widget="many2one_avatar"/>
+                            <field name="endpoint"/>
+                            <field name="status_code" widget="badge"/>
+                            <field name="created_at" widget="datetime"/>
+                        </group>
+                    </group>
+                    
+                    <notebook>
+                        <page string="Payload (Requête)" name="payload">
+                            <field name="payload" widget="text" readonly="1"/>
+                        </page>
+                        
+                        <page string="Réponse" name="response">
+                            <field name="response" widget="text" readonly="1"/>
+                        </page>
+                        
+                        <page string="Erreur" name="error" invisible="not error_message">
+                            <field name="error_message" widget="text" readonly="1"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_api_log_search" model="ir.ui.view">
+        <field name="name">api.log.search</field>
+        <field name="model">api.log</field>
+        <field name="arch" type="xml">
+            <search string="Rechercher Journaux">
+                <field name="client_id"/>
+                <field name="endpoint"/>
+                <field name="error_message"/>
+                <separator/>
+                <filter string="Succès (200)" name="success" domain="[('status_code', '=', 200)]"/>
+                <filter string="Créé (201)" name="created" domain="[('status_code', '=', 201)]"/>
+                <filter string="Erreur Client (4xx)" name="client_error" domain="[('status_code', '>=', 400), ('status_code', '&lt;', 500)]"/>
+                <filter string="Erreur Serveur (5xx)" name="server_error" domain="[('status_code', '>=', 500)]"/>
+                <separator/>
+                <filter string="Avec Erreurs" name="has_error" domain="[('error_message', '!=', False)]"/>
+                <separator/>
+                <filter string="Aujourd'hui" name="today" domain="[('created_at', '>=', (context_today()).strftime('%Y-%m-%d'))]"/>
+                <group expand="1" string="Grouper par">
+                    <filter string="Client" name="group_client" context="{'group_by': 'client_id'}"/>
+                    <filter string="Endpoint" name="group_endpoint" context="{'group_by': 'endpoint'}"/>
+                    <filter string="Code Statut" name="group_status" context="{'group_by': 'status_code'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_api_log" model="ir.actions.act_window">
+        <field name="name">Journaux API</field>
+        <field name="res_model">api.log</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_api_log_search"/>
+        <field name="context">{'search_default_today': 1}</field>
+    </record>
+</odoo>

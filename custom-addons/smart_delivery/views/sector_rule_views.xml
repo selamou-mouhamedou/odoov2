@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_sector_rule_tree" model="ir.ui.view">
+        <field name="name">sector.rule.tree</field>
+        <field name="model">sector.rule</field>
+        <field name="arch" type="xml">
+            <list string="Règles de Secteur" sample="1">
+                <field name="sector_type"/>
+                <field name="base_price" string="Prix de Base" widget="monetary"/>
+                <field name="distance_fee_per_km" string="Frais/km" widget="monetary"/>
+                <field name="free_distance_km" string="Km Gratuits"/>
+                <field name="otp_required" widget="boolean"/>
+                <field name="signature_required" widget="boolean"/>
+                <field name="photo_required" widget="boolean"/>
+                <field name="biometric_required" widget="boolean"/>
+                <field name="livreur_count"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_sector_rule_form" model="ir.ui.view">
+        <field name="name">sector.rule.form</field>
+        <field name="model">sector.rule</field>
+        <field name="arch" type="xml">
+            <form string="Règle de Secteur">
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button class="oe_stat_button" type="object" name="action_view_livreurs" icon="fa-motorcycle">
+                            <field name="livreur_count" widget="statinfo" string="Livreurs"/>
+                        </button>
+                    </div>
+                    
+                    <div class="oe_title">
+                        <label for="sector_type" string="Type de Secteur"/>
+                        <h1>
+                            <!-- Use standard selection widget to allow choosing the sector type on creation -->
+                            <field name="sector_type"/>
+                        </h1>
+                    </div>
+                    
+                    <group string="Tarification">
+                        <group>
+                            <field name="base_price" widget="monetary"/>
+                            <field name="free_distance_km"/>
+                        </group>
+                        <group>
+                            <field name="distance_fee_per_km" widget="monetary"/>
+                        </group>
+                    </group>
+                    
+                    <group string="Conditions Requises">
+                        <group>
+                            <field name="otp_required" widget="boolean_toggle"/>
+                            <field name="signature_required" widget="boolean_toggle"/>
+                        </group>
+                        <group>
+                            <field name="photo_required" widget="boolean_toggle"/>
+                            <field name="biometric_required" widget="boolean_toggle"/>
+                        </group>
+                    </group>
+                    
+                    <group>
+                        <field name="description" placeholder="Description de la règle..."/>
+                    </group>
+                    
+                    <notebook>
+                        <page string="Livreurs" name="livreurs">
+                            <field name="livreur_ids" nolabel="1">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="phone"/>
+                                    <field name="vehicle_type"/>
+                                    <field name="availability"/>
+                                    <field name="verified"/>
+                                    <field name="rating"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_sector_rule_search" model="ir.ui.view">
+        <field name="name">sector.rule.search</field>
+        <field name="model">sector.rule</field>
+        <field name="arch" type="xml">
+            <search string="Rechercher Règles">
+                <field name="sector_type"/>
+                <separator/>
+                <filter string="Standard" name="standard" domain="[('sector_type', '=', 'standard')]"/>
+                <filter string="Premium" name="premium" domain="[('sector_type', '=', 'premium')]"/>
+                <filter string="Express" name="express" domain="[('sector_type', '=', 'express')]"/>
+                <filter string="Fragile" name="fragile" domain="[('sector_type', '=', 'fragile')]"/>
+                <filter string="Médical" name="medical" domain="[('sector_type', '=', 'medical')]"/>
+                <separator/>
+                <filter string="OTP Requis" name="otp" domain="[('otp_required', '=', True)]"/>
+                <filter string="Signature Requise" name="signature" domain="[('signature_required', '=', True)]"/>
+                <filter string="Photo Requise" name="photo" domain="[('photo_required', '=', True)]"/>
+                <filter string="Biométrie Requise" name="biometric" domain="[('biometric_required', '=', True)]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_sector_rule" model="ir.actions.act_window">
+        <field name="name">Règles de Secteur</field>
+        <field name="res_model">sector.rule</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_sector_rule_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Créer une nouvelle règle de secteur
+            </p>
+            <p>
+                Les règles de secteur définissent la tarification et les conditions 
+                de validation pour chaque type de livraison.
+            </p>
+        </field>
+    </record>
+</odoo>

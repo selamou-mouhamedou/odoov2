@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Configure Firebase JSON Path -->
+        <!-- The system now automatically looks for 'data/firebase_service_account.json' inside the module. -->
+        <!-- Use this parameter only if you want to override the default location. -->
+        <record id="param_firebase_json_path" model="ir.config_parameter">
+            <field name="key">smart_delivery.firebase_json_path</field>
+            <field name="value"></field>
+        </record>
+    </data>
+</odoo>

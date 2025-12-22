@@ -1,0 +1,13 @@
+
+odoo/**/
+venv/**/
+**/__pycache__/
+*.py[cod]
+*$py.class
+.DS_Store
+odoo.log
+*.json
+!custom-addons/**/*.json
+custom-addons/smart_delivery/data/firebase_service_account.json
+
+custom-addons/smart_delivery/data/firebase_service_account.json
