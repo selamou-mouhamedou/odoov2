@@ -484,7 +484,7 @@ class SmartDeliveryAPI(http.Controller):
                 sectors_data.append({
                     'id': sector.id,
                     'sector_type': sector.sector_type,
-                    'name': sector.name,
+                    'name': sector.sector_type,
                     'description': sector.description or '',
                     'requirements': {
                         'otp_required': sector.otp_required,
@@ -808,7 +808,7 @@ class SmartDeliveryAPI(http.Controller):
                 })
             
             # Get sector names for response
-            sector_names = [s.name for s in livreur.sector_ids]
+            sector_names = [s.sector_type for s in livreur.sector_ids]
             
             # Get document names for response
             document_names = [{'name': doc['name']} for doc in documents_data]

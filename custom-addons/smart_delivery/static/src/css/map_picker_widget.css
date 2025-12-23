@@ -1,0 +1,184 @@
+/* ═══════════════════════════════════════════════════════════════════
+   GPS MAP PICKER WIDGET STYLES
+   ═══════════════════════════════════════════════════════════════════ */
+
+.gps-map-picker-container {
+    width: 100%;
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+}
+
+/* Map Wrapper */
+.map-wrapper {
+    position: relative;
+    width: 100%;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Map Container */
+.gps-map-container {
+    width: 100%;
+    height: 400px;
+    background: #e9ecef;
+    border-radius: 8px;
+    z-index: 1;
+}
+
+/* Loading Overlay */
+.map-loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.9);
+    z-index: 1000;
+    border-radius: 8px;
+}
+
+/* Control Panel */
+.map-control-panel {
+    padding: 10px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Status Panel */
+.map-status-panel {
+    padding: 10px 15px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+.map-status-panel .badge {
+    min-width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: bold;
+}
+
+/* Custom Marker Icons */
+.custom-pickup-marker,
+.custom-drop-marker {
+    background: transparent !important;
+    border: none !important;
+}
+
+.marker-icon {
+    position: relative;
+    text-align: center;
+}
+
+.marker-icon span {
+    position: absolute;
+    top: 4px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 10px;
+    font-weight: bold;
+    color: white;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.marker-icon.pickup i {
+    color: #28a745;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.marker-icon.drop i {
+    color: #dc3545;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Map Instructions */
+.map-instructions {
+    padding: 8px 12px;
+    background: #fff3cd;
+    border-radius: 6px;
+    border-left: 4px solid #ffc107;
+}
+
+.map-instructions strong {
+    color: #856404;
+}
+
+/* Button Styles */
+.map-control-panel .btn {
+    transition: all 0.2s ease;
+}
+
+.map-control-panel .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .gps-map-container {
+        height: 300px;
+    }
+    
+    .map-status-panel .row > div {
+        margin-bottom: 8px;
+    }
+    
+    .map-control-panel .btn-group {
+        flex-wrap: nowrap;
+    }
+    
+    .map-control-panel .btn {
+        font-size: 12px;
+        padding: 4px 8px;
+    }
+}
+
+/* Leaflet popup customization */
+.leaflet-popup-content-wrapper {
+    border-radius: 8px !important;
+}
+
+.leaflet-popup-content {
+    margin: 10px 12px !important;
+    font-size: 13px;
+}
+
+/* Animation for markers */
+.leaflet-marker-icon {
+    transition: transform 0.2s ease;
+}
+
+.leaflet-marker-icon:hover {
+    transform: scale(1.1);
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .gps-map-picker-container {
+        background: #2d3748;
+        border-color: #4a5568;
+    }
+    
+    .map-control-panel,
+    .map-status-panel {
+        background: #374151;
+        color: #e5e7eb;
+    }
+    
+    .map-instructions {
+        background: #4a4a2a;
+        border-left-color: #d69e2e;
+        color: #faf089;
+    }
+}

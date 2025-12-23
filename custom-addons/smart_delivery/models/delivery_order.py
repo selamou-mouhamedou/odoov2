@@ -255,7 +255,7 @@ class DeliveryOrder(models.Model):
             raise UserError(_('Seules les commandes en brouillon ou en cours de dispatching peuvent être assignées'))
         
         if self.assigned_livreur_id and not force:
-             if self.assigned_livreur_id.availability and self.assigned_livreur_id.verified:
+            if self.assigned_livreur_id.availability and self.assigned_livreur_id.verified:
                 self.write({'status': 'assigned'})
                 return {
                     'type': 'ir.actions.client',
@@ -570,8 +570,6 @@ class DeliveryOrder(models.Model):
         try:
             billing.action_create_invoice()
         except Exception as e:
-            import logging
-            _logger = logging.getLogger(__name__)
             _logger.warning(f"Could not auto-create invoice for billing {billing.id}: {e}")
         
         return billing
@@ -582,6 +580,31 @@ class DeliveryOrder(models.Model):
         if self.status != 'assigned':
             raise UserError(_('La commande doit être assignée'))
         self.write({'status': 'on_way'})
+    
+    def action_reset_to_draft(self):
+        """Remet la commande en brouillon depuis l'état dispatching"""
+        self.ensure_one()
+        if self.status != 'dispatching':
+            raise UserError(_('Seules les commandes en cours de dispatching peuvent être remises en brouillon'))
+        
+        self.write({
+            'status': 'draft',
+            'dispatched_livreur_ids': [(5, 0, 0)],
+            'current_batch_livreur_ids': [(5, 0, 0)],
+            'dispatch_start_time': False,
+            'first_dispatch_time': False,
+        })
+        
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('Commande Réinitialisée'),
+                'message': _('La commande %s a été remise en brouillon') % self.name,
+                'type': 'info',
+                'sticky': False,
+            }
+        }
     
     def action_fail_delivery(self):
         """Marque la livraison comme échouée"""

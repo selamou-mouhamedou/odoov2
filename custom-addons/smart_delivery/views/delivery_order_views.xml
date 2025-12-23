@@ -44,6 +44,9 @@
                 <header>
                     <button name="assign_livreur" string="Assigner Livreur" type="object" 
                             class="oe_highlight" invisible="status != 'draft'"/>
+                    <button name="action_reset_to_draft" string="Retour Brouillon" type="object" 
+                            class="btn-warning" invisible="status != 'dispatching'"
+                            confirm="Êtes-vous sûr de vouloir remettre cette commande en brouillon?"/>
                     <button name="action_start_delivery" string="Démarrer Livraison" type="object" 
                             class="btn-primary" invisible="status != 'assigned'"/>
                     <button name="validate_conditions" string="Valider Conditions" type="object" 
@@ -52,7 +55,7 @@
                             class="btn-danger" invisible="status in ['delivered', 'failed', 'cancelled']"
                             confirm="Êtes-vous sûr de marquer cette livraison comme échouée?"/>
                     <button name="action_cancel" string="Annuler" type="object" 
-                            class="btn-secondary" invisible="status not in ['draft', 'assigned']"
+                            class="btn-secondary" invisible="status not in ['draft', 'dispatching', 'assigned']"
                             confirm="Êtes-vous sûr de vouloir annuler cette commande?"/>
                     <field name="status" widget="statusbar" statusbar_visible="draft,dispatching,assigned,on_way,delivered,cancelled"/>
                 </header>
@@ -112,14 +115,24 @@
                     
                     <notebook>
                         <page string="Coordonnées GPS" name="gps">
+                            <!-- GPS Map Picker Widget -->
+                            <div class="o_form_sheet_bg">
+                                <field name="pickup_lat" widget="gps_map_picker"/>
+                            </div>
+                            
+                            <!-- Hidden fields for form compatibility (read-only display) -->
                             <group>
-                                <group string="Point de Pickup">
-                                    <field name="pickup_lat"/>
-                                    <field name="pickup_long"/>
+                                <group string="Point de Pickup (coordonnées)">
+                                    <field name="pickup_lat" readonly="1" widget="float" 
+                                           options="{'digits': [10, 7]}"/>
+                                    <field name="pickup_long" readonly="1" widget="float" 
+                                           options="{'digits': [10, 7]}"/>
                                 </group>
-                                <group string="Point de Livraison">
-                                    <field name="drop_lat"/>
-                                    <field name="drop_long"/>
+                                <group string="Point de Livraison (coordonnées)">
+                                    <field name="drop_lat" readonly="1" widget="float" 
+                                           options="{'digits': [10, 7]}"/>
+                                    <field name="drop_long" readonly="1" widget="float" 
+                                           options="{'digits': [10, 7]}"/>
                                 </group>
                             </group>
                         </page>

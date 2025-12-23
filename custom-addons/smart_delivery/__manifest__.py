@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Smart Delivery',
-    'version': '18.0.1.9.0',
+    'version': '18.0.1.10.0',
     'category': 'Delivery',
     'summary': 'Système de livraison intelligent avec dispatching automatique',
     'description': """
@@ -77,5 +77,12 @@
     'application': True,
     'auto_install': False,
     'license': 'LGPL-3',
+    'assets': {
+        'web.assets_backend': [
+            'smart_delivery/static/src/css/map_picker_widget.css',
+            'smart_delivery/static/src/js/map_picker_widget.js',
+            'smart_delivery/static/src/xml/map_picker_widget.xml',
+        ],
+    },
 }
 

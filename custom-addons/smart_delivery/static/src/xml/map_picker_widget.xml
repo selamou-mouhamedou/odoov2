@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="smart_delivery.GpsMapPickerWidget">
+        <div class="gps-map-picker-container">
+            <!-- Control Panel -->
+            <div class="map-control-panel mb-3">
+                <div class="d-flex flex-wrap gap-2 align-items-center">
+                    <div class="btn-group" role="group">
+                        <button type="button" 
+                                t-attf-class="btn btn-sm {{ state.isSelectingPickup ? 'btn-success' : 'btn-outline-success' }}"
+                                t-on-click="resetToPickup">
+                            <i class="fa fa-map-marker me-1"/>
+                            Pickup
+                        </button>
+                        <button type="button" 
+                                t-attf-class="btn btn-sm {{ !state.isSelectingPickup ? 'btn-danger' : 'btn-outline-danger' }}"
+                                t-on-click="selectDrop">
+                            <i class="fa fa-flag-checkered me-1"/>
+                            Livraison
+                        </button>
+                    </div>
+                    
+                    <button type="button" class="btn btn-sm btn-info" t-on-click="useCurrentLocation">
+                        <i class="fa fa-crosshairs me-1"/>
+                        Ma Position
+                    </button>
+                    
+                    <button type="button" class="btn btn-sm btn-warning" t-on-click="clearAll">
+                        <i class="fa fa-trash me-1"/>
+                        Effacer
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Status Panel -->
+            <div class="map-status-panel mb-3">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="d-flex align-items-center">
+                            <span class="badge bg-success me-2">P</span>
+                            <small><strong>Pickup:</strong> <t t-esc="pickupCoords"/></small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="d-flex align-items-center">
+                            <span class="badge bg-danger me-2">D</span>
+                            <small><strong>Livraison:</strong> <t t-esc="dropCoords"/></small>
+                        </div>
+                    </div>
+                    <div class="col-md-4" t-if="distanceKm">
+                        <div class="d-flex align-items-center">
+                            <span class="badge bg-primary me-2"><i class="fa fa-road"/></span>
+                            <small><strong>Distance:</strong> <t t-esc="distanceKm"/> km</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Map Container -->
+            <div class="map-wrapper">
+                <div t-ref="mapContainer" class="gps-map-container"/>
+                
+                <!-- Loading overlay -->
+                <div t-if="!state.mapReady" class="map-loading-overlay">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Chargement...</span>
+                    </div>
+                    <span class="ms-2">Chargement de la carte...</span>
+                </div>
+            </div>
+            
+            <!-- Instructions -->
+            <div class="map-instructions mt-2">
+                <small class="text-muted">
+                    <i class="fa fa-info-circle me-1"/>
+                    <t t-if="state.isSelectingPickup">
+                        Cliquez sur la carte pour définir le <strong>point de pickup</strong>, ou utilisez le bouton "Ma Position".
+                    </t>
+                    <t t-else="">
+                        Cliquez sur la carte pour définir le <strong>point de livraison</strong>. Glissez les marqueurs pour ajuster.
+                    </t>
+                </small>
+            </div>
+        </div>
+    </t>
+    
+</templates>
