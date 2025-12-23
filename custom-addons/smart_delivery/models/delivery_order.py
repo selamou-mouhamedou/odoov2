@@ -60,10 +60,10 @@ class DeliveryOrder(models.Model):
     receiver_name = fields.Char(string='Nom du Destinataire', tracking=True)
     receiver_phone = fields.Char(string='Téléphone Destinataire', required=True, tracking=True)
     
-    pickup_lat = fields.Float(string='Latitude Pickup', required=True, digits=(10, 7))
-    pickup_long = fields.Float(string='Longitude Pickup', required=True, digits=(10, 7))
-    drop_lat = fields.Float(string='Latitude Livraison', required=True, digits=(10, 7))
-    drop_long = fields.Float(string='Longitude Livraison', required=True, digits=(10, 7))
+    pickup_lat = fields.Float(string='Latitude Pickup', digits=(10, 7), default=0.0)
+    pickup_long = fields.Float(string='Longitude Pickup', digits=(10, 7), default=0.0)
+    drop_lat = fields.Float(string='Latitude Livraison', digits=(10, 7), default=0.0)
+    drop_long = fields.Float(string='Longitude Livraison', digits=(10, 7), default=0.0)
     
     assigned_livreur_id = fields.Many2one('delivery.livreur', string='Livreur Assigné', tracking=True,
                                           help="Seuls les livreurs ayant le type de secteur sélectionné sont affichés")
@@ -254,6 +254,12 @@ class DeliveryOrder(models.Model):
         if self.status not in ['draft', 'dispatching']:
             raise UserError(_('Seules les commandes en brouillon ou en cours de dispatching peuvent être assignées'))
         
+        # Validate GPS coordinates before dispatching
+        if not self.pickup_lat or not self.pickup_long:
+            raise UserError(_('Veuillez définir les coordonnées GPS du point de pickup sur la carte'))
+        if not self.drop_lat or not self.drop_long:
+            raise UserError(_('Veuillez définir les coordonnées GPS du point de livraison sur la carte'))
+        
         if self.assigned_livreur_id and not force:
             if self.assigned_livreur_id.availability and self.assigned_livreur_id.verified:
                 self.write({'status': 'assigned'})
@@ -365,6 +371,7 @@ class DeliveryOrder(models.Model):
             'pickup_long': f"{self.pickup_long:.7f}" if self.pickup_long else '0.0',
             'drop_lat': f"{self.drop_lat:.7f}" if self.drop_lat else '0.0',
             'drop_long': f"{self.drop_long:.7f}" if self.drop_long else '0.0',
+            'created_at': fields.Datetime.now().isoformat(),
         }
         
         send_push_notification(tokens, title, body, data, env=self.env)

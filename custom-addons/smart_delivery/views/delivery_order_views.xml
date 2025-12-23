@@ -118,20 +118,24 @@
                             <!-- GPS Map Picker Widget -->
                             <div class="o_form_sheet_bg">
                                 <field name="pickup_lat" widget="gps_map_picker"/>
+                                <!-- Hidden fields that the widget updates -->
+                                <field name="pickup_long" invisible="1"/>
+                                <field name="drop_lat" invisible="1"/>
+                                <field name="drop_long" invisible="1"/>
                             </div>
                             
-                            <!-- Hidden fields for form compatibility (read-only display) -->
+                            <!-- Editable coordinate fields as fallback -->
                             <group>
                                 <group string="Point de Pickup (coordonnées)">
-                                    <field name="pickup_lat" readonly="1" widget="float" 
+                                    <field name="pickup_lat" widget="float" 
                                            options="{'digits': [10, 7]}"/>
-                                    <field name="pickup_long" readonly="1" widget="float" 
+                                    <field name="pickup_long" widget="float" 
                                            options="{'digits': [10, 7]}"/>
                                 </group>
                                 <group string="Point de Livraison (coordonnées)">
-                                    <field name="drop_lat" readonly="1" widget="float" 
+                                    <field name="drop_lat" widget="float" 
                                            options="{'digits': [10, 7]}"/>
-                                    <field name="drop_long" readonly="1" widget="float" 
+                                    <field name="drop_long" widget="float" 
                                            options="{'digits': [10, 7]}"/>
                                 </group>
                             </group>
